@@ -6,53 +6,9 @@ from pprint import pprint
 import logging.config
 import paho.mqtt.publish as publish
 import json
+import config
 
-logging.basicConfig(level=logging.DEBUG)
-class config:
-    COUNTER_ID = "001394FA"
-    MAX_TIME_SEC = 600
-    # Conversion function : consumption (L) = a*x + b
-    CONSUMPTION_A = 0.3311
-    MONITOR_INTERVAL = 60
-    CONSUMPTION_B = 17
-    DEBUG = True
-    MQTT_SERVER = "mqtt.jbfuzier.fr"
-    MQTT_TOPIC = "waterconsumption"
-    LOGGING_CONFIG = { 
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': { 
-            'standard': { 
-                'format': '%(asctime)-15s - %(process)d [%(levelname)s] %(name)s: %(message)s'
-            },
-        },
-        'handlers': { 
-            'default': { 
-                'level': 'DEBUG',
-                'formatter': 'standard',
-                'class': 'logging.StreamHandler',
-            },
-            'file': {
-                'level': 'DEBUG',
-                'formatter': 'standard',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': 'debug.log',
-                'maxBytes': 10*1024*1024,
-                'backupCount': 5,
-            },
-        },
-        'loggers': {
-            '': { 
-                # 'handlers': ['default', 'file'],
-                'handlers': ['default'],
-                'level': 'DEBUG',
-                'propagate': True
-            },
-        } 
-    }
-    
 logging.config.dictConfig(config.LOGGING_CONFIG)
-    
 FNULL = open(os.devnull, 'w')
 
 class WaterConsumption:
@@ -110,22 +66,22 @@ class WaterConsumption:
                 data = data[7]
                 logging.debug(serial + ' ' + data)
                 data_d = {
-                    'constant_1': serial,
-                    'header': data[:10], # 0x1c441486
-                    'serial_inv': data[10:18],# serial (inverse) ab941300
-                    'constant_2': data[18:24], # 0411a0
+                    # 'constant_1': serial,
+                    # 'header': data[:10], # 0x1c441486
+                    # 'serial_inv': data[10:18],# serial (inverse) ab941300
+                    # 'constant_2': data[18:24], # 0411a0
                     'consumption': data[24:32], # inverse
-                    'unknown_1': data[32], # 0 ou 1
-                    'constant_3': data[33], # 8 ou c
-                    'unknown_2': data[34], # 0 ou 4 ou 1 ou c
-                    'constant_4': data[35:52], # 0030000000005ff0b
-                    'unknown_3': data[52:56],
-                    'constant_5': data[56:60], # 0000
+                    # 'unknown_1': data[32], # 0 ou 1
+                    # 'constant_3': data[33], # 8 ou c
+                    # 'unknown_2': data[34], # 0 ou 4 ou 1 ou c
+                    # 'constant_4': data[35:52], # 0030000000005ff0b
+                    # 'unknown_3': data[52:56],
+                    # 'constant_5': data[56:60], # 0000
                 }
                 consumption = int(data[30:32] + data[28:30] + data[26:28] + data[24:26], 16)
                 consumption = config.CONSUMPTION_A*consumption + config.CONSUMPTION_B
-                data_d["consumption"] = consumption
-                pprint(data_d) # TODO
+                data_d["consumption"] = round(consumption)
+                # pprint(data_d) 
                 for k, v in data_d.iteritems():
                     if k in self.expected_data:
                         if not v in self.expected_data[k]:
