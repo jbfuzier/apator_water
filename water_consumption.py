@@ -8,9 +8,8 @@ import paho.mqtt.publish as publish
 import json
 import config
 
-logging.config.dictConfig(config.LOGGING_CONFIG)
 FNULL = open(os.devnull, 'w')
-
+logging.info(config.MQTT_SERVER)
 class WaterConsumption:
     expected_data = {
         'header': ['0x1c441486'],
