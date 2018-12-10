@@ -111,6 +111,7 @@ if __name__ == '__main__':
             while True:
                 try:
                     publish.single(config.MQTT_TOPIC+"/out", json.dumps(data), hostname=config.MQTT_SERVER)
+                    break
                 except Exception as e:
                     i+=1
                     if time > 3:
