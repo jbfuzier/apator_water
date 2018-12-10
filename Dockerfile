@@ -20,5 +20,5 @@ RUN apt update && apt install -y \
     apt remove --purge -y build-essential libusb-1.0-0-dev cmake
 COPY    ./ /root/apator_water
 CMD cd ~/apator_water && \
-    pip install -r requirements.txt && \
-    env && /usr/local/bin/python water_consumption.py
+    pip install -r requirements.txt && echo "start" && \
+    /usr/local/bin/python water_consumption.py
