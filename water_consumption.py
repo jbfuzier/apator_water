@@ -110,7 +110,9 @@ if __name__ == '__main__':
             i = 0
             while True:
                 try:
+                    logging.debug("Gonne write %s to mqtt"%data)
                     publish.single(config.MQTT_TOPIC+"/out", json.dumps(data), hostname=config.MQTT_SERVER)
+                    logging.debug("Successfull write to mqtt")
                     break
                 except Exception as e:
                     i+=1

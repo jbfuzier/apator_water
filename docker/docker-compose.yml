@@ -5,8 +5,8 @@ services:
         devices:
             - "/dev/bus/usb:/dev/bus/usb"
         environment:
-            - MQTT_SERVER="'mqtt.XXXXXXXX'"
+            - MQTT_SERVER="'mqtt.jbfuzier.fr'"
             - COUNTER_ID="'001394FA'"
-            - MONITOR_INTERVAL="600"
-            - CONSUMPTION_A="0.3311"
-            - CONSUMPTION_B="17"
+            - MONITOR_INTERVAL=600
+            - CONSUMPTION_A=0.3311
+            - CONSUMPTION_B=17

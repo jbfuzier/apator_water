@@ -17,10 +17,11 @@ RUN apt update && apt install -y \
     git clone https://github.com/jbfuzier/rtl-wmbus.git && \
     cd rtl-wmbus/ && \
     make release && \
-    cd && \
+    apt remove --purge -y build-essential libusb-1.0-0-dev cmake
+    
+CMD cd && \
+    rm -rf .\apator_water && \
     git clone https://github.com/jbfuzier/apator_water.git && \
     cd apator_water && \
     pip install -r requirements.txt && \
-    apt remove --purge -y build-essential libusb-1.0-0-dev cmake git
-    
-CMD cd ~/apator_water && /usr/local/bin/python water_consumption.py
+    /usr/local/bin/python water_consumption.py
