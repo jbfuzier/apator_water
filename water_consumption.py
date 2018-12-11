@@ -10,7 +10,7 @@ import config
 
 logging.config.dictConfig(config.LOGGING_CONFIG)
 FNULL = open(os.devnull, 'w')
-logging.info(config.MQTT_SERVER)
+logging.info("Using mqtt : %s"%config.MQTT_SERVER)
 class WaterConsumption:
     expected_data = {
         'header': ['0x1c441486'],
@@ -22,7 +22,7 @@ class WaterConsumption:
         'constant_5': ['0000']
     }
     def __init__(self):
-        self.rtl_sdr = ["rtl_sdr", "-f", "868.9M", "-s", "1600000", "-"]
+        self.rtl_sdr = ["/root/rtl-sdr/build/src/rtl_sdr", "-f", "868.9M", "-s", "1600000", "-"]
         self.rtl_wmbus = ["/root/rtl-wmbus/build/rtl_wmbus"]
         self.last_consumption = None
         self.last_time = None
@@ -103,16 +103,15 @@ class WaterConsumption:
 if __name__ == '__main__':
     w = WaterConsumption()
     while True:
+        logging.info("Launching RF data collection")
         data = w.get()
-        
         if data:
-            pprint(data)
             i = 0
             while True:
                 try:
                     logging.debug("Gonne write %s to mqtt"%data)
                     publish.single(config.MQTT_TOPIC+"/out", json.dumps(data), hostname=config.MQTT_SERVER)
-                    logging.debug("Successfull write to mqtt")
+                    logging.info("Successfull write to mqtt")
                     break
                 except Exception as e:
                     i+=1
@@ -123,6 +122,6 @@ if __name__ == '__main__':
                     time.sleep(10)
         else:
             logging.warning("Failed to get data")
-        logging.info("All done")
+        logging.info("all done, waiting %ss"%config.MONITOR_INTERVAL)
         time.sleep(config.MONITOR_INTERVAL)
 

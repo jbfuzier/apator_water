@@ -2,6 +2,7 @@ version: '3'
 services:
     watersensor:
         build: .
+        image: watersensor:latest
         devices:
             - "/dev/bus/usb:/dev/bus/usb"
         environment:
