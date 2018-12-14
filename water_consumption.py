@@ -9,8 +9,10 @@ import json
 import config
 
 logging.config.dictConfig(config.LOGGING_CONFIG)
+
 FNULL = open(os.devnull, 'w')
 logging.info("Using mqtt : %s"%config.MQTT_SERVER)
+logging.info("Counter : %s (type=%s)"%(config.COUNTER_ID, type(config.COUNTER_ID)))
 class WaterConsumption:
     expected_data = {
         'header': ['0x1c441486'],
@@ -34,7 +36,7 @@ class WaterConsumption:
         else:
             output = subprocess.Popen(self.rtl_wmbus, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=FNULL)
             sdr_data = subprocess.Popen(self.rtl_sdr, stdout=output.stdin, stderr=FNULL)
-        time.sleep(2) # Wait to see if there is an error at startup
+        time.sleep(10) # Wait to see if there is an error at startup
         error = False
         for proc in [sdr_data, output]:
             return_code = proc.poll()
@@ -64,7 +66,7 @@ class WaterConsumption:
                     continue
                 serial = data[6]
                 data = data[7]
-                logging.debug(serial + ' ' + data)
+                logging.debug(serial + '%s'%type(serial) + ' ' + data)
                 data_d = {
                     # 'constant_1': serial,
                     # 'header': data[:10], # 0x1c441486
@@ -87,6 +89,7 @@ class WaterConsumption:
                         if not v in self.expected_data[k]:
                             logging.error("Unexpected value (%s, expected %s)"%(v, self.expected_data[k]))
                 if serial == config.COUNTER_ID:
+                    logging.info("Got data for %s"%serial)
                     if self.last_consumption:
                         data_d['delta'] = round(consumption - self.last_consumption)
                         data_d['flow_rate'] = round(data_d['delta']/ ((time.time()-self.last_time)/60))
@@ -98,7 +101,8 @@ class WaterConsumption:
                     output.terminate()
                     output.wait()
                     return data_d
-
+                else:
+                    logging.debug("%s!=%s"%(serial, config.COUNTER_ID))
 
 if __name__ == '__main__':
     w = WaterConsumption()
@@ -124,4 +128,5 @@ if __name__ == '__main__':
             logging.warning("Failed to get data")
         logging.info("all done, waiting %ss"%config.MONITOR_INTERVAL)
         time.sleep(config.MONITOR_INTERVAL)
+        logging.info("sleep done")
 

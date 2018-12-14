@@ -6,8 +6,11 @@ services:
         devices:
             - "/dev/bus/usb:/dev/bus/usb"
         environment:
-            - MQTT_SERVER="'mqtt.jbfuzier.fr'"
-            - COUNTER_ID="'001394FA'"
-            - MONITOR_INTERVAL=600
-            - CONSUMPTION_A=0.3311
-            - CONSUMPTION_B=17
+            - MQTT_SERVER="mqtt.jbfuzier.fr"
+            - COUNTER_ID="001394FA"
+            - PYTHONUNBUFFERED=1
+        deploy:
+            restart_policy:
+                delay: 60s
+                max_attempts: 3
+                window: 120s
