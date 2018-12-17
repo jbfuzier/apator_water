@@ -7,12 +7,38 @@ import logging.config
 import paho.mqtt.publish as publish
 import json
 import config
+from threading import Timer, Thread, Event
+
 
 logging.config.dictConfig(config.LOGGING_CONFIG)
 
 FNULL = open(os.devnull, 'w')
 logging.info("Using mqtt : %s"%config.MQTT_SERVER)
 logging.info("Counter : %s (type=%s)"%(config.COUNTER_ID, type(config.COUNTER_ID)))
+
+
+class WatchDog(Thread):
+    def __init__(self, pids, event):
+        super(WatchDog, self).__init__()
+        self.pids = pids
+        self.event = event
+
+    def run(self):
+        logging.debug("WDT starting (child pids : %s)"%self.pids)
+        r = self.event.wait(config.WATCHDOG_KILL_TIME)
+        if r:
+            logging.debug("Watchdog exit (got event)")
+        else:
+            logging.debug("Watchdog timeout")
+            for p in self.pids:
+                logging.debug("Watchdog : Killing hanged process : %s"%p)
+                try:
+                    os.kill(p, signal.SIGKILL)
+                except Exception as e:
+                    logging.debug("WatchDog got exception %s while killing %s"%(e, p))
+        logging.debug("Watchdog all done")
+
+
 class WaterConsumption:
     expected_data = {
         'header': ['0x1c441486'],
@@ -49,6 +75,10 @@ class WaterConsumption:
         if error:
             logging.error("ERROR")
             return None
+        event = Event()
+        wd = WatchDog(pids=[output.pid, sdr_data.pid], event=event)
+        wd.daemon = True
+        wd.start()
         tstart = time.time()
         logging.debug("Collecting results")
         with output.stdout:
@@ -100,6 +130,8 @@ class WaterConsumption:
                     sdr_data.wait()
                     output.terminate()
                     output.wait()
+                    logging.debug("Notifying watchdog")
+                    event.set()
                     return data_d
                 else:
                     logging.debug("%s!=%s"%(serial, config.COUNTER_ID))

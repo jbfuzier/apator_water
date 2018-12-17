@@ -1,10 +1,11 @@
 COUNTER_ID = "001394FA"
-MAX_TIME_SEC = 600
+MAX_TIME_SEC = 500
 # Conversion function : consumption (L) = A*x + B
 CONSUMPTION_A = 0.3311
 CONSUMPTION_B = 17
 #
 MONITOR_INTERVAL = 600
+WATCHDOG_KILL_TIME = 500
 DEBUG = False
 MQTT_SERVER = "mymqttserver.com"
 MQTT_TOPIC = "waterconsumption"
