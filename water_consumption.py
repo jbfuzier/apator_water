@@ -8,7 +8,7 @@ import paho.mqtt.publish as publish
 import json
 import config
 from threading import Timer, Thread, Event
-
+import signal
 
 logging.config.dictConfig(config.LOGGING_CONFIG)
 
